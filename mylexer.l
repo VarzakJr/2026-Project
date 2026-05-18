@@ -5,7 +5,7 @@
   #include "cgen.h"
   #include "myanalyzer.tab.h"
   
-  int lineNum = 1;
+  int line_num = 1;
 %}
 
   /* NEW CODE FOR HANDLING @def (until line 42)*/
@@ -49,6 +49,9 @@ DECIMAL ([+-]?"."{NUMBER})|([+-]?{NUMBER}("."{NUMBER}?)?)
 REAL    {DECIMAL}([eE][+-]?{NUMBER})?
 STRING	\"[^'\n]*\"
 
+
+%%
+
 "@def"[ \t]+{ID}[ \t]+[^\n]* {
     /* yytext = "@def <name> <replacement...>" */
     char *text = strdup(yytext);
@@ -80,8 +83,6 @@ STRING	\"[^'\n]*\"
     /* do NOT return a token */
 }
 
-%%
-
 int		    return KW_INT;
 real 		return KW_REAL;
 text		return KW_TEXT;
@@ -110,7 +111,7 @@ record		return KW_RECORD;
 drocer		return KW_DROCER;
 of			return KW_OF;
 
-/* NEW HANDLING OF ID RULE */
+
 
 {ID} {
     const char *rep = find_def(yytext);
@@ -164,12 +165,12 @@ of			return KW_OF;
 "="			/*printf("Assign operator :");*/ return '=';
 "->"		/*printf("Function arrow :");*/ return KW_ARROW_FUNCTION;
 
-"--"[^\n]*  printf("//Line %d: line comment: %s\n", lineNum, yytext);/* eat line comments */
+"--"[^\n]*  printf("//Line %d: line comment: %s\n", line_num, yytext);/* eat line comments */
 
 [ \r\t]+		/* eat whitespace */
-\n 					 ++lineNum;
+\n 					 ++line_num;
 
-\* NEW HANDLING OF EOF RULE *\
+
 
 <<EOF>> {
     if (in_macro && YY_CURRENT_BUFFER == macro_buf) {
@@ -183,5 +184,5 @@ of			return KW_OF;
         return 0;         /* real EOF for the parser */
     }
 }
-.           { printf("Line %d Lexical Error: Unrecognized literal %s\n", lineNum, yytext); }
+.           { printf("Line %d Lexical Error: Unrecognized literal %s\n", line_num, yytext); }
 %%

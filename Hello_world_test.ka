@@ -1,0 +1,5 @@
+@def message "Hello world!\n"
+
+fun main():
+	writeText(message);
+nuf;
