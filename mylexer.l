@@ -8,6 +8,39 @@
   int lineNum = 1;
 %}
 
+  /* NEW CODE FOR HANDLING @def (until line 42)*/
+
+  typedef struct {
+    char *name;
+    char *value;
+  } DefEntry;
+
+  #define MAX_DEFS 1024
+
+  static DefEntry defs[MAX_DEFS];
+  static int def_count = 0;
+
+  static void add_def(const char *name, const char *value) {
+    if (def_count >= MAX_DEFS) return;
+    defs[def_count].name  = strdup(name);
+    defs[def_count].value = strdup(value);
+    def_count++;
+  }
+
+  /* look up most recent definition */
+  static const char *find_def(const char *name) {
+    for (int i = def_count - 1; i >= 0; --i) {
+      if (strcmp(defs[i].name, name) == 0)
+        return defs[i].value;
+    }
+    return NULL;
+  }
+
+  /* single-level macro expansion buffer */
+  static YY_BUFFER_STATE macro_buf = NULL;
+  static YY_BUFFER_STATE file_buf  = NULL;
+  static int in_macro = 0;
+
 
 ID      [a-zA-Z_][0-9a-zA-Z_]*
 DIGIT   [0-9]
@@ -15,6 +48,37 @@ NUMBER  [+-]?{DIGIT}{DIGIT}*
 DECIMAL ([+-]?"."{NUMBER})|([+-]?{NUMBER}("."{NUMBER}?)?)
 REAL    {DECIMAL}([eE][+-]?{NUMBER})?
 STRING	\"[^'\n]*\"
+
+"@def"[ \t]+{ID}[ \t]+[^\n]* {
+    /* yytext = "@def <name> <replacement...>" */
+    char *text = strdup(yytext);
+    char *p = text;
+
+    /* skip "@def" */
+    p += 4;
+    while (*p == ' ' || *p == '\t') p++;
+
+    /* parse identifier */
+    char *name_start = p;
+    while (isalnum((unsigned char)*p) || *p == '_') p++;
+    char saved = *p;
+    *p = '\0';
+    char *name = strdup(name_start);
+    *p = saved;
+
+    /* skip spaces before replacement */
+    while (*p == ' ' || *p == '\t') p++;
+
+    char *value = strdup(p);
+
+    add_def(name, value);
+
+    free(name);
+    free(value);
+    free(text);
+
+    /* do NOT return a token */
+}
 
 %%
 
@@ -46,8 +110,23 @@ record		return KW_RECORD;
 drocer		return KW_DROCER;
 of			return KW_OF;
 
+/* NEW HANDLING OF ID RULE */
 
-{ID}        	{ yylval.str = strdup(yytext); /*printf("Identifier : ");*/ return TK_IDENT; }
+{ID} {
+    const char *rep = find_def(yytext);
+    if (rep && !in_macro) {
+        /* First time expanding this macro: switch to buffer with replacement */
+        file_buf = YY_CURRENT_BUFFER;
+        if (macro_buf) yy_delete_buffer(macro_buf);
+        macro_buf = yy_scan_string(rep);
+        yy_switch_to_buffer(macro_buf);
+        in_macro = 1;
+        return yylex();   /* get token(s) from replacement */
+    } else {
+        yylval.str = strdup(yytext);
+        return TK_IDENT;
+    }
+}
 {NUMBER}    	{ yylval.str = strdup(yytext); return TK_NUMBER; }
 {REAL}      	{ yylval.str = strdup(yytext); return TK_REAL; }
 {STRING}		{ yylval.str = strdup(yytext); return TK_STRING; }
@@ -90,6 +169,19 @@ of			return KW_OF;
 [ \r\t]+		/* eat whitespace */
 \n 					 ++lineNum;
 
-<<EOF>> 	return EOF;
+\* NEW HANDLING OF EOF RULE *\
+
+<<EOF>> {
+    if (in_macro && YY_CURRENT_BUFFER == macro_buf) {
+        /* finished macro replacement: go back to the original file */
+        yy_delete_buffer(macro_buf);
+        macro_buf = NULL;
+        yy_switch_to_buffer(file_buf);
+        in_macro = 0;
+        return yylex();   /* continue lexing original input */
+    } else {
+        return 0;         /* real EOF for the parser */
+    }
+}
 .           { printf("Line %d Lexical Error: Unrecognized literal %s\n", lineNum, yytext); }
 %%
