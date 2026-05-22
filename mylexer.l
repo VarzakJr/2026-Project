@@ -47,7 +47,7 @@ DIGIT   [0-9]
 NUMBER  [+-]?{DIGIT}{DIGIT}*
 DECIMAL ([+-]?"."{NUMBER})|([+-]?{NUMBER}("."{NUMBER}?)?)
 REAL    {DECIMAL}([eE][+-]?{NUMBER})?
-STRING	\"[^'\n]*\"
+STRING  \"([^\"\n\\]|\\.)*\"
 
 
 %%
@@ -165,7 +165,7 @@ of			return KW_OF;
 "="			/*printf("Assign operator :");*/ return '=';
 "->"		/*printf("Function arrow :");*/ return KW_ARROW_FUNCTION;
 
-"--"[^\n]*  printf("//Line %d: line comment: %s\n", line_num, yytext);/* eat line comments */
+"--"[^\n]*  /* eat line comments */
 
 [ \r\t]+		/* eat whitespace */
 \n 					 ++line_num;
