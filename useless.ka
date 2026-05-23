@@ -1,0 +1,24 @@
+-- File: useless.ka
+-- A piece of Kappa code for demonstration purposes
+
+@def N -100
+
+a, b: int;
+
+fun cube(i: int)-> int:
+   return i*i*i;
+nuf;
+   
+fun add(n: int, k: int)-> int:
+   j: int;
+  
+   j = (N-n) + cube(k);
+   writeInt(j);
+   return j;
+nuf;
+
+fun main(): 
+   a = readInt();
+   b = readInt();
+   add(a, b); -- Here you can see some dummy comments!
+nuf;

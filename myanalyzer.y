@@ -346,6 +346,8 @@ expr:
 	| '(' expr ')'			{ $$ = template("%s", $2); }
 	| expr '+' expr 		{ $$ = template("%s + %s", $1, $3); }
 	| expr '-' expr 		{ $$ = template("%s - %s", $1, $3); }
+	| '-'expr  %prec UMINUS { $$ = template("(-%s)", $2); }
+    | '+'expr  %prec UMINUS { $$ = $2; }
 	| expr '*' expr 		{ $$ = template("%s * %s", $1, $3); }
 	| expr '/' expr 		{ $$ = template("%s / %s", $1, $3); }
 	| expr '%' expr 		{ $$ = template("%s %% %s", $1, $3); }
@@ -509,14 +511,14 @@ while_statement:
 	
 for_statement:	
 	KW_FOR TK_IDENT KW_IN '[' expr ':' expr ']' ':' if_for_while_body KW_ROF ';'
-		{ $$ = template("for (int %s = %s; %s < %s; %s++) {\n%s\n}", $2, $5, $2, $7, $2, $10); }
+		{ $$ = template("for (int %s = %s; %s <= %s; %s++) {\n%s\n}", $2, $5, $2, $7, $2, $10); }
 	| KW_FOR TK_IDENT KW_IN '[' expr ':' expr ':' expr ']' ':' if_for_while_body KW_ROF ';'
 		{
 			step_value = atoi($9);
 			if (step_value > 0) {
-				$$ = template("for (int %s = %s; %s < %s; %s+=%s) {\n%s\n}", $2, $5, $2, $7, $2, $9, $12); 
+				$$ = template("for (int %s = %s; %s <= %s; %s+=%s) {\n%s\n}", $2, $5, $2, $7, $2, $9, $12); 
 			} else if (step_value == -1) { 
-				$$ = template("for (int %s = %s; %s < %s; %s--) {\n%s\n}", $2, $5, $2, $7, $2, $12); 
+				$$ = template("for (int %s = %s; %s >= %s; --%s) {\n%s\n}", $2, $5, $2, $7, $2, $12); 
 			} else {
 				$$ = template("for (int %s = %s; %s < %s; %s-=%s) {\n%s\n}", $2, $5, $2, $7, $2, $9+1, $12);
 			}
@@ -525,9 +527,9 @@ for_statement:
 
 function_statement:
 	TK_IDENT '(' function_parameter_list ')' ';' { $$ = template("%s(%s);", $1, $3); }
-	| TK_IDENT '.' expr_function ';' 			 { $$ = template("%s.%s;?", $1, $3); } 
-	| comp_variable '.' expr_function ';' 		 { $$ = template("%s.%s;?", $1, $3); } 
-	| array_value '.' expr_function ';' 		 { $$ = template("%s.%s;?", $1, $3); } 
+	| TK_IDENT '.' expr_function ';' 			 { $$ = template("%s.%s;", $1, $3); } 
+	| comp_variable '.' expr_function ';' 		 { $$ = template("%s.%s;", $1, $3); } 
+	| array_value '.' expr_function ';' 		 { $$ = template("%s.%s;", $1, $3); } 
 	;
 
 expr_function:

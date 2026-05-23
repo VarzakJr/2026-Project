@@ -1,0 +1,15 @@
+-- A piece of Theta code for demonstration purposes
+
+const N = 100: int;
+
+a[100]: int;
+
+fun main(): 
+
+  for i in [0:N]:
+    a[i] = i;
+  rof;
+
+  half <- [ x / 2 for x: int in a of 100] : real;
+  
+nuf;
