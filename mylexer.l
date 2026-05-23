@@ -44,10 +44,10 @@
 
 ID      [a-zA-Z_][0-9a-zA-Z_]*
 DIGIT   [0-9]
-NUMBER  [+-]?{DIGIT}{DIGIT}*
+NUMBER  {DIGIT}+
 DECIMAL ([+-]?"."{NUMBER})|([+-]?{NUMBER}("."{NUMBER}?)?)
-REAL    {DECIMAL}([eE][+-]?{NUMBER})?
-STRING  \"([^\"\n\\]|\\.)*\"
+REAL    {NUMBER}("."{NUMBER}?)?([eE][+-]?{NUMBER})?
+STRING  \"[^"\n]*\"
 
 
 %%

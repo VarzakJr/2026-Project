@@ -1,0 +1,84 @@
+-- This is a program that implements and tests the quicksort algorithm
+-- to sort an array of reals.
+
+-- Global variable use by the random number generator function.
+next_random:int;
+
+-- A simple random number generator.
+-- Change the global variable next_random 
+-- to produce a different sequence of pseudorandom numbers.
+
+fun next()->int:
+    next_random = (next_random * 1103515245 + 12345) % 2147483648;
+    if (next_random<0):
+        next_random = -next_random;
+    fi;
+    return next_random;
+nuf;
+
+-- Swap the elements of array a at positions i and j
+-- assuming that i and j are valid indices
+fun swap(a[]:real, i:integer, j:integer):
+    temp:real;
+    temp = a[i];
+    a[i] = a[j];
+    a[j] = temp;
+nuf;
+
+-- Impelementation of the quick sort algorithm
+fun quickFSort(a[]:real, low:int, high:int):
+    pivot, i, j : int;
+    if (low < high):
+        pivot = low;
+        i = low;
+        j = high;
+        while (i < j):
+            while(a[i] <= a[pivot] and i < high):
+                i = i+1;
+            od;
+            while(a[j] > a[pivot]):
+                j = j-1;
+            od;
+            if (i < j):
+                swap(a,i,j);
+            fi;
+        od;
+        swap(a,pivot,j);
+        quickFSort(a, low, j - 1);
+        quickFSort(a, j + 1, high);
+    fi;
+nuf;
+
+-- Print contents of an array of reals
+def printFArray(a[]:real, size:int):
+    for i in [0:size]:
+        writeReal(a[i]);
+        if (i==size-1):
+            continue;
+        fi;
+        writeText(", ");
+    rof;
+    writeText("\n");
+nuf;
+
+-- Test quickSort
+fun main():
+    const aSize = 100:int;
+
+    writeText("Give a seed for the random number generator: ");
+    next_random = readInt();
+
+    -- Create an array of random numbers from 0 to 999 using comprehension
+    a <- [next()%1000 for i:100]:int;
+    
+    -- Create an array for half values of a using comprehension
+    f <- [x/2.0 for x:int in a of 100]: real;
+    
+    writeText("Random array generated: ");
+    printFArray(f,aSize);
+
+    quickFSort(f,0,aSize-1);
+
+    writeText("Sorted array: ");
+    printFArray(f,aSize);
+nuf;

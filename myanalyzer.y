@@ -346,6 +346,8 @@ expr:
 	| '(' expr ')'			{ $$ = template("%s", $2); }
 	| expr '+' expr 		{ $$ = template("%s + %s", $1, $3); }
 	| expr '-' expr 		{ $$ = template("%s - %s", $1, $3); }
+	| '-'expr  %prec UMINUS { $$ = template("(-%s)", $2); }
+    | '+'expr  %prec UMINUS { $$ = $2; }
 	| expr '*' expr 		{ $$ = template("%s * %s", $1, $3); }
 	| expr '/' expr 		{ $$ = template("%s / %s", $1, $3); }
 	| expr '%' expr 		{ $$ = template("%s %% %s", $1, $3); }

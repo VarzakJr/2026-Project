@@ -1,0 +1,185 @@
+record Address:
+  #street: text;
+  #number: int;
+  #city: text;
+
+  fun setAddress(s: text, n: int, c: text):
+    #street = s;
+    #number = n;
+    #city = c;
+  nuf;
+
+  fun printAddress():
+    write("Address: %s %d, %s\n", #street, #number, #city);    
+  nuf;
+drocer;
+
+record Person:
+  #firstName, #lastName: text;
+  #email: text;
+  #phone: int;
+  #address: Address;
+
+  fun setPerson(fn: text, ln: text, email: text, phone: int, addr: Address):
+    #firstName = fn;
+    #lastName = ln;
+    #email = email;
+    #phone = phone;
+    #address = addr;
+  nuf;
+
+  fun printPersonInfo():
+    write("%s %s, email: %s phone: %d\n", #firstName, #lastName, #email, #phone);
+    #address.printAddress();
+  nuf;
+
+drocer;
+
+record Book:
+  #title, #isbn: text;
+  #author: Person;  
+  #numOfCopies: int;
+  #price: real;
+
+  fun setBook(t: text, a: Person, numOfCopies: int, price: real):
+    #title = t;
+    #author = a;
+    #numOfCopies = numOfCopies;
+    #price = price;
+  nuf;
+
+  fun printBook():
+    write("Title: %s\n", #title);
+    writeText("Author:");
+    #author.printPersonInfo();
+    write("Price:%f\n", #price);
+    write("Number of available copies: %d\n", #numOfCopies);    
+  nuf;
+drocer;
+
+record Order:
+  #orderNum: int;
+  #book: Book;
+  #quantity: int;
+  #shippingAddress: Address;
+  #delivered: bool;
+
+  fun setOrder(orNum: int, b: Book, q: int, sh: Address, del: bool):
+    #orderNum = orNum;
+    #book = b;
+    #quantity = q;
+    #shippingAddress = sh;
+    #delivered = del;
+  nuf;
+
+  fun printOrder():
+    ;
+  nuf;
+
+drocer;
+
+record Bookstore:
+  #name: text;
+  #listOfBooks[100]: Book;
+  #numOfBooks: int;
+  #listOfOrders[100]: Order;
+  #numOfOrders: int;
+
+  fun putOrder(o: Order):    
+    #listOfOrders[#numOfOrders] = o;
+    #numOfOrders += 1;
+  nuf;
+ 
+  fun addBook(b: Book):    
+    #listOfBooks[#numOfBooks] = b;
+    #numOfBooks += 1;
+  nuf;
+
+  fun printBookStoreBooks():
+    for i in [0 : #numOfBooks]:
+      #listOfBooks[i].printBook();
+    rof;
+  nuf;
+
+  fun calculateTotalOrdersIncome()-> real:     
+    total: real;
+    total = 0;
+
+    for i in [0 : #numOfOrders]:
+      if (#listOfOrders[i].#delivered):
+        total = total + #listOfOrders[i].#quantity * #listOfOrders[i].#book.#price;      
+      fi;
+    rof;
+
+    return total;
+  nuf; 
+drocer;
+
+orderId: int;
+
+-- factory functions
+fun createAddress(s: text, n: int, c: text)-> Address:
+  a: Address;
+  a.setAddress(s, n, c);    
+  return a;
+nuf;
+
+fun createPerson(fn: text, ln: text, email: text, phone: int, addr: Address)-> Person:
+  p: Person;
+  p.setPerson(fn, ln, email, phone, addr);    
+  return p;
+nuf;
+
+fun createBook(t: text, a: Person, numOfCopies: int, price: real)-> Book:
+  b: Book;
+  b.setBook(t, a, numOfCopies, price);
+  return b;
+nuf;
+
+fun createOrder(orNum: int, b: Book, q: int, sh: Address, del:bool)-> Order:
+  ord: Order;
+  ord.setOrder(orNum, b, q, sh, del);
+  return ord;
+nuf;
+
+fun createBookstore(n: text)->Bookstore:
+  bs: Bookstore;
+  bs.#name = n;
+  bs.#numOfBooks = 0;
+  bs.#numOfOrders = 0;
+  
+  return bs;
+nuf;
+
+fun main():
+  orderId = 0;
+
+  a, a1: Address;
+  a = createAddress("Stadiou", 10, "Stadiou");  
+
+  author: Person;
+  author = createPerson("Christos","Papadimitriou","cpap@gmail.com", 12345, a);   
+
+  b: Book;
+  b = createBook("Computation Theory", author, 34.3, 100);
+  
+  bs: Bookstore;
+  bs = createBookstore("Papasotiriou");
+  
+  bs.addBook(b);
+
+  a = createAddress("Wall Street", 10, "NY");
+  author = createPerson("Dennis", "Richie", "richie@gmail.com", 54321, a);
+  b = createBook("C Programming", author, 10.3, 100);  
+  bs.addBook(b);  
+
+  bs.printBookStoreBooks();
+
+  ord: Order;
+  ord = createOrder(orderId, b, 2, a, False );  
+  orderId +=  1;
+  
+  bs.putOrder(ord);
+  write("Bookstore orders income: %.2f\n", bs.calculateTotalOrdersIncome());
+
+nuf;
