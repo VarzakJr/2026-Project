@@ -50,7 +50,7 @@ fun quickFSort(a[]:real, low:int, high:int):
 nuf;
 
 -- Print contents of an array of reals
-def printFArray(a[]:real, size:int):
+fun printFArray(a[]:real, size:int):
     for i in [0:size]:
         writeReal(a[i]);
         if (i==size-1):

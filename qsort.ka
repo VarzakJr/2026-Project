@@ -62,7 +62,7 @@ fun printArray(a[]:int, size:int):
 nuf;
 
 -- Test quickSort
-def main():
+fun main():
     const aSize = 100:integer;
 
     a[100]:integer;
@@ -73,7 +73,7 @@ def main():
     -- Create an array of random numbers from 0 to 999
     for i in [0:aSize]:
         a[i] = next() % 1000;
-    endfor;
+    rof;
     
     writeStr("Random array generated: ");
     printArray(a,aSize);
@@ -82,4 +82,4 @@ def main():
 
     writeStr("Sorted array: ");
     printArray(a,aSize);
-enddef;
+nuf;
