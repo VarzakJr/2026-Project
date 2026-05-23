@@ -97,7 +97,8 @@ extern int yydebug;
     KW_DECR = 298,                 /* KW_DECR  */
     KW_TIMES_INCR = 299,           /* KW_TIMES_INCR  */
     KW_DIV_DECR = 300,             /* KW_DIV_DECR  */
-    KW_MOD_DECR = 301              /* KW_MOD_DECR  */
+    KW_MOD_DECR = 301,             /* KW_MOD_DECR  */
+    UMINUS = 302                   /* UMINUS  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -110,7 +111,7 @@ union YYSTYPE
 
 	char* str;
 
-#line 114 "myanalyzer.tab.h"
+#line 115 "myanalyzer.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
